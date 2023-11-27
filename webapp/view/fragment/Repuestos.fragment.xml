@@ -1,0 +1,35 @@
+<core:FragmentDefinition
+    xmlns:core="sap.ui.core" 
+    xmlns="sap.m"
+    xmlns:l="sap.ui.layout"
+    xmlns:form="sap.ui.layout.form"
+	xmlns:html="http://www.w3.org/1999/xhtml">
+	<List
+        width="auto"
+        delete="onDeleteRepuesto"
+        mode="Delete"
+        class="sapUiSmallMargin boxShadowTable" 
+        items="{repuestosModel>/repuestos}"
+        includeItemInSelection="true">
+        <headerToolbar>
+            <Toolbar>				
+                <ToolbarSpacer />
+                <Button
+                    icon="sap-icon://add" 
+                    text="{i18n>anadirRepuestos}" 
+                    type="Emphasized"
+                    class="sapUiSmallMarginEnd"
+                    press="onPressRepuestos"/>
+            </Toolbar>
+        </headerToolbar>
+        <ObjectListItem
+			title="({repuestosModel>Matnr}) {repuestosModel>Maktx}"
+            type="Active"
+            number="{
+            	path: 'repuestosModel>Labst',
+            	type: 'sap.ui.model.odata.type.Decimal'
+            }"
+            numberUnit="{repuestosModel>Meins}">
+        </ObjectListItem>
+    </List>
+</core:FragmentDefinition>

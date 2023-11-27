@@ -1,0 +1,60 @@
+<core:View 
+    xmlns:core="sap.ui.core" 
+    xmlns:mvc="sap.ui.core.mvc" 
+    xmlns:layout="sap.ui.layout"
+	xmlns:form="sap.ui.layout.form"
+	xmlns:u="sap.ui.unified"
+	xmlns:fb="sap.ui.comp.filterbar"    
+	xmlns="sap.m"
+    xmlns:html="http://www.w3.org/1999/xhtml"
+    busyIndicatorDelay="0"
+	controllerName="es.cdl.yesui5pm007.controller.Notificacion">
+	<App id="NotificacionUrgenteApp">
+		<pages>
+			<Page
+			    showNavButton="false"
+			    busyIndicatorDelay="0"
+			    busy="{viewModel>/cargandoWizard}"
+			    navButtonPress="onSalirAplicacion"
+			    title="{i18n>notificacionUrgente}">
+		          <Wizard 
+		            id="WizardCrearOrden"
+		            showNextButton="false"
+		            complete="onCrearOrden"
+		            finishButtonText="{i18n>confirmar}">
+		            <WizardStep
+		            	id="wizardStepCabecera"
+		            	validated="{viewModel>/stepCompleteCabecera}"
+		                title="{i18n>informacionBasica}">
+			   			<core:Fragment fragmentName="es.cdl.yesui5pm007.view.fragment.Parte" type="XML"/>
+		   			</WizardStep>
+		   			<WizardStep 
+		   				id="wizardStepRepuestos"
+		   				optional="true"
+		                title="{i18n>repuestos}"
+		                validated="true"
+		                complete="onCompleteCabecera">
+		                <core:Fragment fragmentName="es.cdl.yesui5pm007.view.fragment.Repuestos" type="XML"/>
+		   			</WizardStep>
+				</Wizard>	
+				<footer>
+					<Toolbar>
+						<ToolbarSpacer/>
+						<Button 
+							visible="{viewModel>/stepCompleteCabecera}"
+							icon="sap-icon://paper-plane"
+							press="onPressNotificar"
+							type="Emphasized"
+							text="{i18n>notificar}"/>
+						<Button 
+							visible="{= !${viewModel>/stepCompleteCabecera} }"
+							text="{= ${viewModel>/ordenIniciada} ? ${i18n>concluirTrabajo} : ${i18n>iniciarTrabajo} }"  
+							type="{= ${viewModel>/ordenIniciada} ? 'Reject' : 'Accept' }"
+							icon="{= ${viewModel>/ordenIniciada} ? 'sap-icon://stop' : 'sap-icon://add-process' }"
+							press="onHandleTrabajo" />
+					</Toolbar>
+				</footer>
+			</Page>
+		</pages>
+	</App>
+</core:View>

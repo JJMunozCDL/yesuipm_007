@@ -1,0 +1,130 @@
+<core:FragmentDefinition
+    xmlns:core="sap.ui.core" 
+    xmlns="sap.m"
+    xmlns:l="sap.ui.layout"
+    xmlns:form="sap.ui.layout.form"
+	xmlns:html="http://www.w3.org/1999/xhtml">
+    <l:VerticalLayout width="100%" >
+	    <l:BlockLayout
+			keepFontSize="true">
+			<l:BlockLayoutRow>
+				<l:BlockLayoutCell
+					title="{i18n>parteTrabajo}">
+					<form:SimpleForm
+					    layout="ResponsiveGridLayout"
+				       	editable="true">
+					    <form:content>
+				        	<Label text="{i18n>descripcion}"/>
+				        	<Input value="{nuevaOrdenModel>/Descripcion}" />
+			        		<Label text="{i18n>centro}"/>
+					        <Select
+					        	enabled="{= !${viewModel>/ordenIniciada} }"
+					        	forceSelection="false"
+					        	showSecondaryValues="true"
+					        	selectedKey="{nuevaOrdenModel>/Werks}"
+					        	change="onChangeCentro"
+					        	items="{/CentrosSet}">
+					        	<core:ListItem key="{Werks}" text="{Name}" additionalText="{Werks}"/>
+					        </Select>
+					        <Label text="" visible="{= ${nuevaOrdenModel>/Equnr} ? true : false }" />
+					        <Label text="{i18n>ubicacionTecnica}"/>
+					     	<Input
+					     		enabled="{= !${viewModel>/ordenIniciada} }"
+					     		valueState="{viewModel>/valueStateUT}"
+		                        valueStateText="{viewModel>/valueStateTextUT}"
+		                        description="{nuevaOrdenModel>/Pltxt}"
+		                        busyIndicatorDelay="0"
+		                        busy="{viewModel>/isCargandoUbicacion}"
+					     		change="onChangeUbicacionTecnica"
+					     		showValueHelp="true"
+					     		value="{nuevaOrdenModel>/Tplnr}" 
+					     		valueHelpRequest="onSelectUbicacionList" />
+					        <Label text="{i18n>equipo}"/>
+					        <ComboBox
+					        	enabled="{= !${viewModel>/ordenIniciada} }"
+					        	showSecondaryValues="true"
+					        	filterSecondaryValues="true"
+					        	selectedKey="{nuevaOrdenModel>/Equnr}"
+					        	items="{equiposModel>/}">
+					        	<core:ListItem key="{equiposModel>Equnr}" text="{equiposModel>Eqktx}" additionalText="{equiposModel>Equnr}"/>
+					        </ComboBox>
+					        <!--
+					        <Select
+					        	enabled="{= !${viewModel>/ordenIniciada} }"
+					        	forceSelection="false"
+					        	showSecondaryValues="true"
+					        	selectedKey="{nuevaOrdenModel>/Equnr}"
+					        	items="{equiposModel>/}">
+					        	<core:ListItem key="{equiposModel>Equnr}" text="{equiposModel>Eqktx}" additionalText="{equiposModel>Equnr}"/>
+					        </Select>
+					        -->
+			<!--		        <Label text="" visible="{= ${nuevaOrdenModel>/Equnr} ? true : false }" />
+ 					        <Link text="{i18n>verDocumentos}" visible="{= ${nuevaOrdenModel>/Equnr} ? true : false }" /> 
+					        <Label text="{i18n>motivo}" />
+							<Select
+								selectedKey="{nuevaOrdenModel>/Motivo}"
+								items="{motivosModel>/}">
+								<core:Item key="{motivosModel>Grund}" text="{motivosModel>Grdtx}" />
+							</Select>	 -->	
+							<Label text="{i18n>claseActividad}"/>
+					        <Select
+					        	selectedKey="{nuevaOrdenModel>/Ilart}"
+								showSecondaryValues="true"
+								forceSelection="false"
+								items="{
+									path: '/ClaseActividadSet',
+									filters: [{ path: 'Spras', operator: 'EQ', value1: 'S'},
+											{ path: 'Auart', operator: 'EQ', value1: 'YMC'}]
+								}">
+					        	<core:ListItem key="{Ilart}" text="{Ilatx}" additionalText="{Ilart}"/>
+					        </Select>
+					        <Label text="{i18n>puestoTrabajo}" visible="false"/>
+					        <Select
+					        	visible="false"
+					        	enabled="false"
+					        	selectedKey="{nuevaOrdenModel>/Arbpl}"
+					        	items="{loginModel>/werks}">
+					        	<core:ListItem key="{loginModel>Arbpl}" text="{loginModel>ArbplTxt}"/>
+					        </Select>
+					    </form:content>
+					</form:SimpleForm>
+				</l:BlockLayoutCell>
+				<l:BlockLayoutCell
+					title="{i18n>tiemposNotificacion}">
+					<form:SimpleForm
+					    layout="ResponsiveGridLayout"
+				       	editable="true">
+					    <form:content>
+				        	<Label text="{i18n>fechaInicio}" />
+						    <DatePicker 
+						    	enabled="{viewModel>/stepCompleteCabecera}"
+						    	dateValue="{nuevaOrdenModel>/FechaInicio}"/>
+					    	<Label text="{i18n>horaInicio}" />
+						    <TimePicker 
+						    	enabled="{viewModel>/stepCompleteCabecera}"
+						    	value="{
+						    		path: 'nuevaOrdenModel>/HoraInicio',
+						    		type: 'sap.ui.model.odata.type.Time'
+						    	}"
+						    	valueFormat="HH:mm"
+								displayFormat="HH:mm" />
+						    <Label text="{i18n>fechaFin}" />
+						    <DatePicker 
+						    	enabled="{viewModel>/stepCompleteCabecera}"
+						    	dateValue="{nuevaOrdenModel>/FechaFin}"/>
+					    	<Label text="{i18n>horaFin}" />
+						    <TimePicker 
+						    	enabled="{viewModel>/stepCompleteCabecera}"
+						    	value="{
+						    		path: 'nuevaOrdenModel>/HoraFin',
+						    		type: 'sap.ui.model.odata.type.Time'
+						    	}"
+						    	valueFormat="HH:mm"
+								displayFormat="HH:mm" />							
+						</form:content>
+					</form:SimpleForm>
+				</l:BlockLayoutCell>	
+			</l:BlockLayoutRow>
+		</l:BlockLayout>
+	</l:VerticalLayout>
+</core:FragmentDefinition>

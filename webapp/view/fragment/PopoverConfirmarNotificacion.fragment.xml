@@ -1,0 +1,36 @@
+<core:FragmentDefinition
+	xmlns="sap.m"
+	xmlns:form="sap.ui.layout.form"	
+	xmlns:core="sap.ui.core">
+	<ResponsivePopover
+		busyIndicatorDelay="0"
+		busy="{viewModel>/creandoNotificacion}"
+		title="{i18n>confirmarNotificacion}"
+		class="sapUiContentPadding"
+		placement="Top">
+		<content>
+			<form:SimpleForm
+			    layout="ResponsiveGridLayout"
+			    labelSpanL= "4"
+		       	labelSpanM= "4"
+		       	emptySpanL= "0"
+		       	emptySpanM= "0"	
+		       	editable="true">
+			    <form:content>
+					<Label text="{i18n>observacion}"/>
+					<TextArea 
+						rows="5"
+						cols="50"
+						value="{nuevaOrdenModel>/TxtCabecera}" />
+			    </form:content>
+		</form:SimpleForm>
+		</content>
+		<beginButton>
+			<Button
+				iconFirst="false"
+				icon="sap-icon://feeder-arrow"
+				text="{i18n>confirmar}"
+				press="onPressConfirmarNotificacion" />
+		</beginButton>
+	</ResponsivePopover>
+</core:FragmentDefinition>

@@ -1,0 +1,23 @@
+<core:FragmentDefinition
+    xmlns:core="sap.ui.core" 
+    xmlns="sap.m"
+    xmlns:form="sap.ui.layout.form"
+	xmlns:html="http://www.w3.org/1999/xhtml">
+	    <SelectDialog
+			title="{i18n>ubicacionesTecnicas}"
+			confirm="onSelectUbicacionTecnicaPosicion"
+			cancel="onCancelarUbicacionTecnica"
+			busyIndicatorDelay="0"
+			busy="{viewModel>/isCargandoUbicacionesList}"
+			search="onSearchUbicacionTecnica"
+			items="{ 
+				path: 'ubicacionTecnicaModel>/'	
+			}">
+			<ObjectListItem
+				title="{ubicacionTecnicaModel>Pltxt}">
+				<attributes>
+				<ObjectAttribute text="{ubicacionTecnicaModel>Tplnr}" />
+			</attributes>
+			</ObjectListItem>
+		</SelectDialog>
+</core:FragmentDefinition>

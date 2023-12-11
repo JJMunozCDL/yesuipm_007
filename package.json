@@ -1,11 +1,11 @@
 {
-  "name": "es.cdl.yesui5pm007",
+  "name": "es.cdl.yesui5pm003",
   "version": "0.0.1",
   "description": "",
   "devDependencies": {
     "@sap/ui5-builder-webide-extension": "1.0.x",
+    "@sap/ux-ui5-tooling": "^1.11.5",
     "@ui5/cli": "^3.0.0",
-    "@sap/ux-ui5-tooling": "1",
     "rimraf": "3.0.2"
   },
   "scripts": {

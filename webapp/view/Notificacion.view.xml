@@ -8,7 +8,7 @@
 	xmlns="sap.m"
     xmlns:html="http://www.w3.org/1999/xhtml"
     busyIndicatorDelay="0"
-	controllerName="es.cdl.yesui5pm007.controller.Notificacion">
+	controllerName="es.cdl.yesui5pm003.controller.Notificacion">
 	<App id="NotificacionUrgenteApp">
 		<pages>
 			<Page
@@ -26,7 +26,7 @@
 		            	id="wizardStepCabecera"
 		            	validated="{viewModel>/stepCompleteCabecera}"
 		                title="{i18n>informacionBasica}">
-			   			<core:Fragment fragmentName="es.cdl.yesui5pm007.view.fragment.Parte" type="XML"/>
+			   			<core:Fragment fragmentName="es.cdl.yesui5pm003.view.fragment.Parte" type="XML"/>
 		   			</WizardStep>
 		   			<WizardStep 
 		   				id="wizardStepRepuestos"
@@ -34,7 +34,7 @@
 		                title="{i18n>repuestos}"
 		                validated="true"
 		                complete="onCompleteCabecera">
-		                <core:Fragment fragmentName="es.cdl.yesui5pm007.view.fragment.Repuestos" type="XML"/>
+		                <core:Fragment fragmentName="es.cdl.yesui5pm003.view.fragment.Repuestos" type="XML"/>
 		   			</WizardStep>
 				</Wizard>	
 				<footer>

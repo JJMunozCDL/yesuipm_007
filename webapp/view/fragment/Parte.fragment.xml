@@ -15,7 +15,7 @@
 				       	editable="true">
 					    <form:content>
 				        	<Label text="{i18n>descripcion}"/>
-				        	<Input value="{nuevaOrdenModel>/Descripcion}" />
+				        	<Input value="{nuevaOrdenModel>/Descripcion}" enabled="{= !${viewModel>/ordenIniciada} }" maxLength="40"/>
 			        		<Label text="{i18n>centro}"/>
 					        <Select
 					        	enabled="{= !${viewModel>/ordenIniciada} }"
@@ -65,7 +65,7 @@
 								selectedKey="{nuevaOrdenModel>/Motivo}"
 								items="{motivosModel>/}">
 								<core:Item key="{motivosModel>Grund}" text="{motivosModel>Grdtx}" />
-							</Select>	 -->	
+							</Select>	 	
 							<Label text="{i18n>claseActividad}"/>
 					        <Select
 					        	selectedKey="{nuevaOrdenModel>/Ilart}"
@@ -77,7 +77,7 @@
 											{ path: 'Auart', operator: 'EQ', value1: 'YMC'}]
 								}">
 					        	<core:ListItem key="{Ilart}" text="{Ilatx}" additionalText="{Ilart}"/>
-					        </Select>
+					        </Select> -->
 					        <Label text="{i18n>puestoTrabajo}" visible="false"/>
 					        <Select
 					        	visible="false"

@@ -48,6 +48,15 @@
                 <Property Name="Verpr" Type="Edm.Decimal" Nullable="false" Precision="12" Scale="3" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
                 <Property Name="Equnr" Type="Edm.String" Nullable="false" MaxLength="18" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
             </EntityType>
+            <EntityType Name="ClaseActividad" sap:content-version="1">
+                <Key>
+                    <PropertyRef Name="Ilart"/>
+                </Key>
+                <Property Name="Spras" Type="Edm.String" Nullable="false" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+                <Property Name="Auart" Type="Edm.String" Nullable="false" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+                <Property Name="Ilart" Type="Edm.String" Nullable="false" MaxLength="3" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+                <Property Name="Ilatx" Type="Edm.String" Nullable="false" MaxLength="30" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+            </EntityType>
             <EntityType Name="Ordenes" sap:content-version="1">
                 <Key>
                     <PropertyRef Name="Aufnr"/>
@@ -79,6 +88,7 @@
                     <PropertyRef Name="Pernr"/>
                 </Key>
                 <Property Name="Pernr" Type="Edm.String" Nullable="false" MaxLength="8" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+                <Property Name="Werks" Type="Edm.String" Nullable="false" MaxLength="4" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
                 <Property Name="Arbpl" Type="Edm.String" Nullable="false" MaxLength="8" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
                 <Property Name="Nachn" Type="Edm.String" Nullable="false" MaxLength="40" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
                 <Property Name="Vorna" Type="Edm.String" Nullable="false" MaxLength="40" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
@@ -105,7 +115,10 @@
                     <PropertyRef Name="Vornr"/>
                 </Key>
                 <Property Name="Pernr" Type="Edm.String" Nullable="false" MaxLength="8" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+                <Property Name="Tplnr" Type="Edm.String" Nullable="false" MaxLength="40" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
                 <Property Name="Aufnr" Type="Edm.String" Nullable="false" MaxLength="12" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+                <Property Name="Equnr" Type="Edm.String" Nullable="false" MaxLength="18" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+                <Property Name="Txt" Type="Edm.String" Nullable="false" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
                 <Property Name="Vornr" Type="Edm.String" Nullable="false" MaxLength="4" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
                 <Property Name="FechaIni" Type="Edm.DateTime" Precision="7" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
                 <Property Name="HoraIni" Type="Edm.Time" Precision="0" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
@@ -217,6 +230,7 @@
                 <EntitySet Name="UbicacionesSet" EntityType="YESUI5PM_SRV.Ubicaciones" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:content-version="1"/>
                 <EntitySet Name="EquiposSet" EntityType="YESUI5PM_SRV.Equipos" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:content-version="1"/>
                 <EntitySet Name="RepuestosSet" EntityType="YESUI5PM_SRV.Repuestos" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:content-version="1"/>
+                <EntitySet Name="ClaseActividadSet" EntityType="YESUI5PM_SRV.ClaseActividad" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:content-version="1"/>
                 <EntitySet Name="OrdenesSet" EntityType="YESUI5PM_SRV.Ordenes" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:content-version="1"/>
                 <EntitySet Name="PersonalSet" EntityType="YESUI5PM_SRV.Personal" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:content-version="1"/>
                 <EntitySet Name="OperacionesSet" EntityType="YESUI5PM_SRV.Operaciones" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:content-version="1"/>
@@ -231,7 +245,7 @@
                     <Parameter Name="Aufnr" Type="Edm.String" Mode="In" MaxLength="12"/>
                     <Parameter Name="Pernr" Type="Edm.String" Mode="In" MaxLength="8"/>
                     <Parameter Name="Vornr" Type="Edm.String" Mode="In" MaxLength="4"/>
-                    <Parameter Name="FechaFin" Type="Edm.DateTime" Mode="In" Precision="7"/>
+                    <Parameter Name="FechaFin" Type="Edm.DateTime" Mode="In" Precision="7" sap:label="Time Stamp"/>
                     <Parameter Name="HoraFin" Type="Edm.Time" Mode="In" Precision="0"/>
                 </FunctionImport>
                 <FunctionImport Name="CrearNotificacionTemporal" ReturnType="YESUI5PM_SRV.NotifTemp" m:HttpMethod="POST">
@@ -243,8 +257,9 @@
                     <Parameter Name="Orden" Type="Edm.String" Mode="In" MaxLength="12"/>
                 </FunctionImport>
             </EntityContainer>
-            <atom:link rel="self" href="http://cdlasgw01.cdl.es:8000/sap/opu/odata/sap/YESUI5PM_SRV/$metadata" xmlns:atom="http://www.w3.org/2005/Atom"/>
-            <atom:link rel="latest-version" href="http://cdlasgw01.cdl.es:8000/sap/opu/odata/sap/YESUI5PM_SRV/$metadata" xmlns:atom="http://www.w3.org/2005/Atom"/>
+            <Annotation Term="Core.SchemaVersion" String="1.0.0" xmlns="http://docs.oasis-open.org/odata/ns/edm"/>
+            <atom:link rel="self" href="http://172.30.6.51:8000/sap/opu/odata/sap/YESUI5PM_SRV/$metadata" xmlns:atom="http://www.w3.org/2005/Atom"/>
+            <atom:link rel="latest-version" href="http://172.30.6.51:8000/sap/opu/odata/sap/YESUI5PM_SRV/$metadata" xmlns:atom="http://www.w3.org/2005/Atom"/>
         </Schema>
     </edmx:DataServices>
 </edmx:Edmx>

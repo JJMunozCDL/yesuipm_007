@@ -1,7 +1,7 @@
 /*global QUnit*/
 
 sap.ui.define([
-	"es.cdl.yesui5pm007/controller/View1.controller"
+	"es.cdl.yesui5pm003/controller/View1.controller"
 ], function (Controller) {
 	"use strict";
 

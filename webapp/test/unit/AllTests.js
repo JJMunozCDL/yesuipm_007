@@ -1,5 +1,5 @@
 sap.ui.define([
-	"es.cdl.yesui5pm007/test/unit/controller/View1.controller"
+	"es.cdl.yesui5pm003/test/unit/controller/View1.controller"
 ], function () {
 	"use strict";
 });

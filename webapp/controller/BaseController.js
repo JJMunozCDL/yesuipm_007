@@ -4,7 +4,7 @@ sap.ui.define([
 ], function(Controller, History) {
 	"use strict";
 
-	return Controller.extend("es.cdl.yesui5pm007.controller.BaseController", {
+	return Controller.extend("es.cdl.yesui5pm003.controller.BaseController", {
 		/**
 		 * Convenience method for accessing the router.
 		 * @public

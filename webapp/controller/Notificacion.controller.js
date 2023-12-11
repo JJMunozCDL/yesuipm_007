@@ -1,20 +1,16 @@
  sap.ui.define([
-     "es/cdl/yesui5pm007/controller/BaseController",
+     "es/cdl/yesui5pm003/controller/BaseController",
      "sap/ui/model/json/JSONModel",
      "sap/ui/model/Filter",
      "sap/ui/model/odata/type/Time",
      "sap/m/MessageBox",
      "sap/m/MessageToast",
-     "es/cdl/yesui5pm007/util/Formatter",
+     "es/cdl/yesui5pm003/util/Formatter",
      ], function(BaseController, JSONModel, Filter, Time, MessageBox, MessageToast, Formatter){
 	
 	"use strict";
-
-	return BaseController.extend("es.cdl.yesui5pm007.controller.Notificacion", {
-		
-		/* =========================================================== */
-		/* lifecycle methods                                           */
-		/* =========================================================== */
+ 
+	return BaseController.extend("es.cdl.yesui5pm003.controller.Notificacion", {
 		
 		formatter: Formatter,
 		
@@ -32,7 +28,12 @@
 			});
 			
 			var oEquiposModel = new JSONModel();
-			var oNuevaOrdenModel = new JSONModel();
+			var oNuevaOrdenModel = new JSONModel({
+				Tplnr  : "0285-112-P08-FAGOR-5",
+				Descripcion : "test descripcion. ",
+				Werks : "2885",
+				Equnr : "10000156"
+			});
 			var oMotivosModel = new JSONModel();
 			var oPersonalModel = new JSONModel();
 			var oUbicacionTecnicaModel = new JSONModel();
@@ -51,11 +52,11 @@
 
 			this.oWizardCrearOrden = this.byId('WizardCrearOrden');
 			
-			this._oPopoverConfirmarNotificacion = sap.ui.xmlfragment("es.cdl.yesui5pm007.view.fragment.PopoverConfirmarNotificacion", this);								
+			this._oPopoverConfirmarNotificacion = sap.ui.xmlfragment("es.cdl.yesui5pm003.view.fragment.PopoverConfirmarNotificacion", this);								
 			this.getView().addDependent(this._oPopoverConfirmarNotificacion);	
 			
 			/* Instanciamos el BusyDialog de creación de notificación */
-			this._oBusyDialogNotificacion = sap.ui.xmlfragment("es.cdl.yesui5pm007.view.fragment.BusyDialogNotificacion", this);
+			this._oBusyDialogNotificacion = sap.ui.xmlfragment("es.cdl.yesui5pm003.view.fragment.BusyDialogNotificacion", this);
 			this.getView().addDependent(this._oBusyDialogNotificacion);
 			
 	/*		var oRouter = this.getRouter();
@@ -91,109 +92,50 @@
 			oBindingList.filter(oFilter);
 		},
 
-		onSeleccionUsuario : function(oEvent) {
-			
-			if (!this._oMatchCodeUsuarios) {
-				this._oMatchCodeUsuarios = sap.ui.xmlfragment("es.cdl.yesui5pm007.view.fragment.personalVH", this);
-				this.getView().addDependent(this._oMatchCodeUsuarios);
-			}
-
-			this._oMatchCodeUsuarios.open();
-		},
-
-		onConfirmSeleccionUsuario : function(oEvent) {
-			var oView = this.getView();
-			var oNuevaOrdenModel = oView.getModel('nuevaOrdenModel');
-			var oViewModel 	= oView.getModel('viewModel');
-			var oSelectedItem = oEvent.getParameter('selectedItem');
-			var oUsuario = oSelectedItem.getBindingContext("personalModel").getObject();
-
-			
-			oNuevaOrdenModel.setProperty("/pernr", oUsuario.Pernr);
-			oNuevaOrdenModel.setProperty("/userName", oUsuario.Vorna + " " + oUsuario.Nachn);
-			this.sPernr = oUsuario.Pernr;
-			
-			this.getView().getModel("personalModel").setProperty("/data", oUsuario);
-			jQuery.sap.delayedCall(0, this, function(){
-				oViewModel.setProperty("/pernrValueState", "Success");	
-			});			
-			
-		},
-		
-
-		onChangePersonalNumber : function(oEvent) {
+		checkNotifTemp : function() {
 			
 			var oView 		= this.getView();
-			var oModel 		= oView.getModel();
 			var oNuevaOrdenModel = oView.getModel('nuevaOrdenModel');
 			var oViewModel 	= oView.getModel('viewModel');
-			var iPernr	= parseInt( oEvent.getParameter('value') );
-			var aPersonal   = this.getView().getModel("personalModel").getProperty("/query");
-			var oPersonal = {};
-			for(var i in aPersonal){
-				if(parseInt( aPersonal[i].Pernr ) == iPernr){
-					oPersonal = aPersonal[i];
-					break;
+
+			this._getNotificacionTemporal( 
+				//Existe notificación pendiente 
+				(oNotificacionTemporal) => {
+					
+					if(oNotificacionTemporal.Aufnr) return;
+					
+					oViewModel.setProperty("/ordenIniciada", true);
+					
+					oNuevaOrdenModel.setProperty("/Tplnr", oNotificacionTemporal.Tplnr);
+					
+					if(oNotificacionTemporal.Tplnr){
+						this._getUbicacionTecnica(oNotificacionTemporal.Tplnr, function(oUbicacionTecnica){
+							if(oUbicacionTecnica.length !== 1){
+								oViewModel.setProperty("/valueStateUT", "Error");
+								oViewModel.setProperty("/valueStateTextUT", "");
+								oNuevaOrdenModel.setProperty("/Pltxt", "");
+							}else{
+								oViewModel.setProperty("/valueStateUT", "None");
+								oViewModel.setProperty("/valueStateTextUT", "");
+								oNuevaOrdenModel.setProperty("/Pltxt", oUbicacionTecnica[0].Pltxt);
+								this._getEquipos(undefined, oUbicacionTecnica[0].Tplnr);
+							}
+						}.bind(this));
+					}else{
+						this._getEquipos(oNotificacionTemporal.Werks);
+					}
+					
+					oNuevaOrdenModel.setProperty("/Equnr", oNotificacionTemporal.Equnr);
+					oNuevaOrdenModel.setProperty("/Descripcion", oNotificacionTemporal.Txt);
+					oNuevaOrdenModel.setProperty("/FechaInicio", oNotificacionTemporal.FechaIni);
+					oNuevaOrdenModel.setProperty("/HoraInicio", oNotificacionTemporal.HoraIni);
+					
+				}, ( Error ) => {
+					this._getEquipos();
 				}
-			}
-			/* Comprobamos si existe el usuario */
-			if(oPersonal.Pernr) {
-		
-				jQuery.sap.delayedCall(100, this, function(){
-					oViewModel.setProperty("/pernrValueState", "Success");
-				});
+			);
 				
-				oNuevaOrdenModel.setProperty("/pernr", oPersonal.Pernr);
-				oNuevaOrdenModel.setProperty("/userName", oPersonal.Vorna + " " + oPersonal.Nachn);
-				oNuevaOrdenModel.setProperty("/data", oPersonal);
-				this.sPernr = oPersonal.Pernr;
-				this._getNotificacionTemporal( 
-					//Existe notificación pendiente 
-				   (oNotificacionTemporal) => {
-					   
-					   if(oNotificacionTemporal.Aufnr) return;
-					   
-					   oViewModel.setProperty("/ordenIniciada", true);
-					   
-					   oNuevaOrdenModel.setProperty("/Tplnr", oNotificacionTemporal.Tplnr);
-					   
-					   if(oNotificacionTemporal.Tplnr){
-						   this._getUbicacionTecnica(oNotificacionTemporal.Tplnr, function(oUbicacionTecnica){
-							   if(oUbicacionTecnica.length !== 1){
-								   oViewModel.setProperty("/valueStateUT", "Error");
-								   oViewModel.setProperty("/valueStateTextUT", "");
-								   oNuevaOrdenModel.setProperty("/Pltxt", "");
-							   }else{
-								   oViewModel.setProperty("/valueStateUT", "None");
-								   oViewModel.setProperty("/valueStateTextUT", "");
-								   oNuevaOrdenModel.setProperty("/Pltxt", oUbicacionTecnica[0].Pltxt);
-								   this._getEquipos(undefined, oUbicacionTecnica[0].Tplnr);
-							   }
-						   }.bind(this));
-					   }else{
-						   this._getEquipos(oNotificacionTemporal.Werks);
-					   }
-					   
-					   oNuevaOrdenModel.setProperty("/Equnr", oNotificacionTemporal.Equnr);
-					   oNuevaOrdenModel.setProperty("/Descripcion", oNotificacionTemporal.Descripcion);
-					   oNuevaOrdenModel.setProperty("/FechaInicio", oNotificacionTemporal.Fecha);
-					   oNuevaOrdenModel.setProperty("/HoraInicio", oNotificacionTemporal.Hora);
-					   
-				   }, ( Error ) => {
-					   this._getEquipos();
-				   }
-		   		);
-				
-			}else{
-				
-				oViewModel.setProperty("/isLoadingPernr", false);
-				
-				jQuery.sap.delayedCall(100, this, function(){
-					oViewModel.setProperty("/pernrValueState", "Error");
-				});
-				
-				oNuevaOrdenModel.setProperty("/userName", "");
-			}
+			
 		},
 		
 		onHandleTrabajo : function(oEvent){
@@ -201,17 +143,24 @@
 			var oModel = this.getModel();
 			var oViewModel = this.getModel('viewModel');
 			var oNuevaOrdenModel = this.getModel('nuevaOrdenModel');
-			
 			var bOrdenIniciada = oViewModel.getProperty("/ordenIniciada");
 			var oTime = new Time();
+			var oTimeFin = oTime.parseValue(new Date().toLocaleTimeString(), "string");
+			var oFechaFin = this.formatUTC(new Date());
 						
 			if(bOrdenIniciada){
 				
 				oViewModel.setProperty("/cargandoWizard", true);
-
-				oModel.remove("/NotificacionTemporalSet('" + this.sPernr + "')", {
+				oModel.callFunction("/CerrarNotificacionTemporal", {
+					method: 'POST',
+					urlParameters: {
+							Pernr: this.sPernr,
+							Aufnr: "",
+							Vornr: "",
+							FechaFin: oFechaFin,
+							HoraFin: oTimeFin 
+					},
 					success: function(oData){
-						
 						oViewModel.setProperty("/stepCompleteCabecera", true);
 						oViewModel.setProperty("/ordenIniciada", !bOrdenIniciada);
 						oViewModel.setProperty("/cargandoWizard", false);
@@ -219,26 +168,23 @@
 						oNuevaOrdenModel.setProperty("/FechaFin", new Date());
 						oNuevaOrdenModel.setProperty("/HoraFin", oTime.parseValue(new Date().toLocaleTimeString(), "string"));
 																	
-						this.oWizardCrearOrden.setCurrentStep(this.byId('wizardStepAnexos'));
-						this.oWizardCrearOrden.goToStep(this.byId('wizardStepCabecera'));
-						
-					}.bind(this), 
+						this.oWizardCrearOrden.setCurrentStep(this.byId('wizardStepRepuestos'));
+						this.oWizardCrearOrden.goToStep(this.byId('wizardStepRepuestos'));												
+					}.bind(this),
 					error: function(oError){
 						oViewModel.setProperty("/cargandoWizard", false);
-					}
-				});	
+					}.bind(this)
+				});
+
 
 			}else{
 								
 				/* Comprobamos campos obligatorios */
-				var sPernr = oNuevaOrdenModel.getProperty("/pernr");
+				var sPernr = this.sPernr;
 				var sTplnr = oNuevaOrdenModel.getProperty("/Tplnr");
 				var sEqunr = oNuevaOrdenModel.getProperty("/Equnr");
 				
-//				if(!sTplnr || oViewModel.getProperty("/valueStateUT") === "Error"){
-//					oViewModel.setProperty("/valueStateUT", "Error");
-//					return;
-//				}
+				
 				
 				if((!sPernr || oViewModel.getProperty("/pernrValueState") === "Error") && !sPernr){
 					MessageToast.show(this.getResourceBundle().getText('numPersonalObligatorio'), { width: '30em'});
@@ -255,6 +201,8 @@
 				oModel.callFunction("/CrearNotificacionTemporal", {
 					method: 'POST',
 					urlParameters: {
+						Vornr : "",
+						Aufnr : "",
 						Pernr: this.sPernr,
 						Tplnr: oNuevaOrdenModel.getProperty("/Tplnr"),
 						Equnr: oNuevaOrdenModel.getProperty("/Equnr"),
@@ -326,7 +274,7 @@
 		onSelectUbicacionList : function(oEvent) {
 			
 			if(!this._oDialogoUbicacionesTecnicas){
-				this._oDialogoUbicacionesTecnicas = sap.ui.xmlfragment("es.cdl.yesui5pm007.view.fragment.DialogoUbicacionesTecnicas", this); 
+				this._oDialogoUbicacionesTecnicas = sap.ui.xmlfragment("es.cdl.yesui5pm003.view.fragment.DialogoUbicacionesTecnicas", this); 
 				this.getView().addDependent(this._oDialogoUbicacionesTecnicas);
 			}
 			this._getUbicacionesTecnicas();		
@@ -353,7 +301,7 @@
 		onPressRepuestos : function(oEvent){
 			
 			if(!this._oDialogoRepuesto){
-				this._oDialogoRepuesto = sap.ui.xmlfragment("es.cdl.yesui5pm007.view.fragment.DialogoRepuesto", this); 
+				this._oDialogoRepuesto = sap.ui.xmlfragment("es.cdl.yesui5pm003.view.fragment.DialogoRepuesto", this); 
 				this.getView().addDependent(this._oDialogoRepuesto);
 			}
 			
@@ -366,16 +314,16 @@
 		onValueHelpRepuesto : function(oEvent){
 			
 			if(!this._oMatchCodeRepuestos){
-				this._oMatchCodeRepuestos = sap.ui.xmlfragment("es.cdl.yesui5pm007.view.fragment.MatchCodeRepuestos", this); 
+				this._oMatchCodeRepuestos = sap.ui.xmlfragment("es.cdl.yesui5pm003.view.fragment.MatchCodeRepuestos", this); 
 				this.getView().addDependent(this._oMatchCodeRepuestos);
 			}
 			
 			var oViewModel = this.getModel('viewModel');
 			var oNuevaOrdenModel = this.getModel('nuevaOrdenModel');
 			
-			oViewModel.setProperty("/selectedKeyRepuestos", "repEquipo");
+			oViewModel.setProperty("/selectedKeyRepuestos", "todos");
 
-			this._getRepuestos(oNuevaOrdenModel.getProperty("/Equnr"));			
+			this._getRepuestos();			
 			
 			this._oMatchCodeRepuestos.open();
 		},
@@ -454,7 +402,7 @@
 		
 		onPressNotificar : function(oEvent){
 			if(!this._oPopoverConfirmarNotificacion){
-				this._oPopoverConfirmarNotificacion = sap.ui.xmlfragment("es.cdl.yesui5pm007.view.fragment.PopoverConfirmarNotificacion", this);								
+				this._oPopoverConfirmarNotificacion = sap.ui.xmlfragment("es.cdl.yesui5pm003.view.fragment.PopoverConfirmarNotificacion", this);								
 				this.getView().addDependent(this._oPopoverConfirmarNotificacion);	
 			}
 			
@@ -488,8 +436,8 @@
 				oModel.createEntry("/NotificacionUrgenteSet", {
 					properties: {
 						Pernr 		: this.sPernr,
-						Iwerk		: oNuevaOrden.Werks,
-						Fecha 		: oFechaInicio,
+						Werks		: oNuevaOrden.Werks,
+						FechaInicio	: oFechaInicio,
 						HoraInicio 	: oNuevaOrden.HoraInicio,
 						FechaFin 	: oFechaFin,
 						HoraFin 	: oNuevaOrden.HoraFin,
@@ -497,7 +445,7 @@
 						Tplnr		: oNuevaOrden.Tplnr,
 						Ilart		: oNuevaOrden.Ilart,
 						Ktext		: oNuevaOrden.Descripcion,
-						TxtCabecera	: oNuevaOrden.TxtCabecera
+						Observacion	: oNuevaOrden.TxtCabecera
 					},
 					success: function(oData, oResponse){
 						
@@ -695,7 +643,23 @@
 			var oLoginModel = this.getModel('loginModel');
 			var oNuevaOrdenModel = this.getModel('nuevaOrdenModel');
 			var oProcesoNotificacionModel = this.getModel('procesoNotificacionModel');
-		
+			var oCData = this.getOwnerComponent().getComponentData();
+			
+			if (oCData){
+
+				if (oCData.startupParameters.Pernr !== undefined){
+					if(oCData.startupParameters.Pernr[0] !== ""){
+						this.sPernr = oCData.startupParameters.Pernr[0];
+						this.checkNotifTemp();
+					}else{
+						this.onNavBack();	
+					}
+				}
+			}
+			//TEMP 
+			
+			this.sPernr = '28';
+			this.checkNotifTemp();
 			oViewModel.setProperty("/", {
 				ordenIniciada: false,
 				stepCompleteCabecera: false,
@@ -713,11 +677,7 @@
 				mostrarRepuestos: false,
 				mostrarOrden: false
 			});
-			
-			oNuevaOrdenModel.setProperty("/", {
-				Arbpl: "X"
-			});		
-			
+						
 		},
 		
 		onAfterRendering : function(oEvent){
@@ -812,7 +772,6 @@
 			
 			var oModel = this.getModel();
 			var oEquiposModel = this.getModel('equiposModel');
-			var oNuevaOrdenModel = this.getModel('nuevaOrdenModel');
 			var aFilters = [];
 			
 			oEquiposModel.setProperty("/", []);
@@ -948,26 +907,24 @@
 			var oViewModel 				  = this.getModel('viewModel');
 		 	var oRepuestosModel  	  	  = this.getModel('repuestosModel');
 		 	var oProcesoNotificacionModel = this.getModel('procesoNotificacionModel');
-		 	
 		 	var oRepuestos	 			  = oRepuestosModel.getProperty("/repuestos");
-
 		 	if(oRepuestos.length === 0){
 				oProcesoNotificacionModel.setProperty("/isCompleted", true);
 		 		return;
 		 	}
 		 	
-		 	/* Creamos el Entry de los repuestos */
+
 		 	for (var i = oRepuestos.length - 1; i >= 0; i--) {
 		 		var oRepuesto = oRepuestos[i];
-		 		oModel.createEntry("/NotificarMaterialesSet",{
+		 		oModel.createEntry("/NotificarRepuestosSet",{
 					properties: {
 						Aufnr: sAufnr,
 						Werks: oRepuesto.Werks,
-						Matnr: oRepuesto.Matnr,		// Material
-						Lgfsb: oRepuesto.Lgort, 	// Almacen
-						Erfme: oRepuesto.Meins, 	// Unidad 
-						Lgpbe: "", 					// Ubicación 
-						Menge: oRepuesto.Labst,  // Cantidad
+						Matnr: oRepuesto.Matnr,	
+						Lgfsb: oRepuesto.Lgort, 	
+						Erfme: oRepuesto.Meins, 	
+						Lgpbe: "", 					 
+						Menge: oRepuesto.Labst,  
 					}
 				});
 		 	}		 	

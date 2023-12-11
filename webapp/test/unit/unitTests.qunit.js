@@ -5,7 +5,7 @@ sap.ui.getCore().attachInit(function () {
 	"use strict";
 
 	sap.ui.require([
-		"es.cdl.yesui5pm007/test/unit/AllTests"
+		"es.cdl.yesui5pm003/test/unit/AllTests"
 	], function () {
 		QUnit.start();
 	});

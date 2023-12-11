@@ -7,7 +7,7 @@ sap.ui.define([
 
 	Opa5.extendConfig({
 		arrangements: new Startup(),
-		viewNamespace: "es.cdl.yesui5pm007.view.",
+		viewNamespace: "es.cdl.yesui5pm003.view.",
 		autoWait: true
 	});
 });

@@ -1,11 +1,11 @@
 sap.ui.define([
 	"sap/ui/core/UIComponent",
 	"sap/ui/Device",
-	"es/cdl/yesui5pm007/model/models"
+	"es/cdl/yesui5pm003/model/models"
 ], function (UIComponent, Device, models) {
 	"use strict";
 
-	return UIComponent.extend("es.cdl.yesui5pm007.Component", {
+	return UIComponent.extend("es.cdl.yesui5pm003.Component", {
 
 		metadata: {
 			manifest: "json"

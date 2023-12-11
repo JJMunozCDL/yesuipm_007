@@ -86,7 +86,7 @@
             "config": {
                 "routerClass": "sap.m.routing.Router",
                 "viewType": "XML",
-                "viewPath": "es.seidor.sapui5.NotificacionUrgente.view",
+                "viewPath": "es.cdl.yesui5pm003.view",
                 "controlId": "NotificacionUrgenteApp",
                 "controlAggregation": "pages"
             },
@@ -107,7 +107,7 @@
         }
     },
     "sap.platform.abap": {
-        "uri": "/sap/bc/ui5_ui5/sap/zspmu407/webapp",
+        "uri": "/sap/bc/ui5_ui5/sap/yesui5pm/webapp",
         "_version": "1.1.0"
     }
 }

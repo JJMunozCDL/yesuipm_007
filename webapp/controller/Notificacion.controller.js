@@ -655,11 +655,10 @@
 						this.onNavBack();	
 					}
 				}
+			}else{
+				this.onNavBack();
 			}
-			//TEMP 
-			
-			this.sPernr = '28';
-			this.checkNotifTemp();
+
 			oViewModel.setProperty("/", {
 				ordenIniciada: false,
 				stepCompleteCabecera: false,

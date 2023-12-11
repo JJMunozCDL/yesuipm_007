@@ -4,9 +4,10 @@
 	<Dialog
 		title="{i18n>notificando}"
 		contentWidth="40%"
+		
 		class="sapUiSizeCompact"
 		beforeClose="onCloseDialogoNotificacion">
-			<List>
+			<List showNoData="false">
 				<NotificationListItem
 					visible="{procesoNotificacionModel>/mostrarOrden}"
 					class="sapUiTinyMargin"

@@ -4,10 +4,10 @@
 	xmlns:html="http://www.w3.org/1999/xhtml">
 	<SelectDialog
 	    title="{i18n>personal}"
-	    search="onSearchUsuario"
-	    confirm="onConfirmSeleccionUsuario"
+	    search="onSearchResponsable"
+	    confirm="onConfirmSeleccionResponsable"
 	    items="{
-    		path: 'personalModel>/',	
+    		path: 'responsableModel>/',	
     		sorter: {
 		        path: 'Pernr', 
 		        descending: false
@@ -17,7 +17,7 @@
     		}
     	}">
 	    <StandardListItem
-	        title="{personalModel>Vorna} {personalModel>Nachn}"
-	        description="{personalModel>Pernr}"/>
+	        title="{responsableModel>Sname}"
+	        description="{responsableModel>Pernr}"/>
 	</SelectDialog>
 </core:FragmentDefinition>

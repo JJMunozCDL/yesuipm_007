@@ -20,6 +20,6 @@ builder:
           name: YESUI5PM_003
           description: Notificación urgente de mantenimiento.
           package: YESUI5PM
-          transport: GW3K900240
+          transport: GW3K900257
         exclude:
           - /test/

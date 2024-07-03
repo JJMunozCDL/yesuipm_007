@@ -17,7 +17,7 @@
 		       	emptySpanM= "0"	
 		       	editable="true">
 			    <form:content>
-					<Label text="{i18n>observacion}"/>
+					<Label text="{i18n>tareas_realizadas}"/>
 					<TextArea 
 						rows="5"
 						cols="50"

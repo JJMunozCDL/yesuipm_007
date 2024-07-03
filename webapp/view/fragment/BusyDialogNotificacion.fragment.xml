@@ -4,7 +4,7 @@
 	<Dialog
 		title="{i18n>notificando}"
 		contentWidth="40%"
-		
+		afterClose="onAfterCloseDialogoNotificacion"
 		class="sapUiSizeCompact"
 		beforeClose="onCloseDialogoNotificacion">
 			<List showNoData="false">

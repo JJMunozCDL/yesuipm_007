@@ -16,7 +16,7 @@
 					    <form:content>
 				        	<Label text="{i18n>descripcion}"/>
 				        	<Input value="{nuevaOrdenModel>/Descripcion}" enabled="{= !${viewModel>/ordenIniciada} }" maxLength="40"/>
-			        		<Label text="{i18n>centro}"/>
+			        		<!-- <Label text="{i18n>centro}"/>
 					        <Select
 					        	enabled="{= !${viewModel>/ordenIniciada} }"
 					        	forceSelection="false"
@@ -25,7 +25,7 @@
 					        	change="onChangeCentro"
 					        	items="{/CentrosSet}">
 					        	<core:ListItem key="{Werks}" text="{Name}" additionalText="{Werks}"/>
-					        </Select>
+					        </Select> -->
 					        <Label text="" visible="{= ${nuevaOrdenModel>/Equnr} ? true : false }" />
 					        <Label text="{i18n>ubicacionTecnica}"/>
 					     	<Input
@@ -48,44 +48,42 @@
 					        	items="{equiposModel>/}">
 					        	<core:ListItem key="{equiposModel>Equnr}" text="{equiposModel>Eqktx}" additionalText="{equiposModel>Equnr}"/>
 					        </ComboBox>
-					        <!--
-					        <Select
-					        	enabled="{= !${viewModel>/ordenIniciada} }"
-					        	forceSelection="false"
-					        	showSecondaryValues="true"
-					        	selectedKey="{nuevaOrdenModel>/Equnr}"
-					        	items="{equiposModel>/}">
-					        	<core:ListItem key="{equiposModel>Equnr}" text="{equiposModel>Eqktx}" additionalText="{equiposModel>Equnr}"/>
-					        </Select>
-					        -->
-			<!--		        <Label text="" visible="{= ${nuevaOrdenModel>/Equnr} ? true : false }" />
- 					        <Link text="{i18n>verDocumentos}" visible="{= ${nuevaOrdenModel>/Equnr} ? true : false }" /> 
-					        <Label text="{i18n>motivo}" />
-							<Select
-								selectedKey="{nuevaOrdenModel>/Motivo}"
-								items="{motivosModel>/}">
-								<core:Item key="{motivosModel>Grund}" text="{motivosModel>Grdtx}" />
-							</Select>	 	
-							<Label text="{i18n>claseActividad}"/>
-					        <Select
-					        	selectedKey="{nuevaOrdenModel>/Ilart}"
-								showSecondaryValues="true"
-								forceSelection="false"
-								items="{
-									path: '/ClaseActividadSet',
-									filters: [{ path: 'Spras', operator: 'EQ', value1: 'S'},
-											{ path: 'Auart', operator: 'EQ', value1: 'YMC'}]
-								}">
-					        	<core:ListItem key="{Ilart}" text="{Ilatx}" additionalText="{Ilart}"/>
-					        </Select> -->
-					        <Label text="{i18n>puestoTrabajo}" visible="false"/>
-					        <Select
-					        	visible="false"
-					        	enabled="false"
-					        	selectedKey="{nuevaOrdenModel>/Arbpl}"
-					        	items="{loginModel>/werks}">
-					        	<core:ListItem key="{loginModel>Arbpl}" text="{loginModel>ArbplTxt}"/>
-					        </Select>
+							<Label text="{i18n>area}"/>
+							<ComboBox	
+									id="areaCombo"
+									enabled="{= !${viewModel>/ordenIniciada} }"
+									selectedKey="{nuevaOrdenModel>/Area}"
+									items="{/AreaSet}">
+									<core:ListItem key="{Beber}" text="{Fing}"/>
+							</ComboBox>
+							<Label text="{i18n>operario}"/>
+							<Input
+					        	value="{nuevaOrdenModel>/Peticionario}"
+					        	description="{nuevaOrdenModel>/PName}"
+								enabled="{= !${viewModel>/ordenIniciada} }"
+					        	busyIndicatorDelay="0"
+					        	maxLength="8"
+								name="Peticionario"
+					            valueHelpRequest="onSeleccionUsuario"
+					            showValueHelp="true"/>				           	 
+							<Label text="{i18n>responsable}"/>
+							<Input
+					        	value="{nuevaOrdenModel>/Destinatario}"
+					        	description="{nuevaOrdenModel>/DName}"
+								enabled="{= !${viewModel>/ordenIniciada} }"
+					        	busyIndicatorDelay="0"
+								name="Destinatario"
+					        	maxLength="8"
+					            valueHelpRequest="onSeleccionResponsable"
+					            showValueHelp="true"/>
+							<Label text="{i18n>parada}"/>
+							<Switch state="{nuevaOrdenModel>/Parada}" customTextOn="SÍ" customTextOff="NO" enabled="{= !${viewModel>/ordenIniciada} }"/>
+							<Label text="{i18n>sintomas}"/>
+							<TextArea 
+								rows="5"
+								enabled="{= !${viewModel>/ordenIniciada} }"
+								cols="50"
+								value="{nuevaOrdenModel>/Sintomas}" />
 					    </form:content>
 					</form:SimpleForm>
 				</l:BlockLayoutCell>

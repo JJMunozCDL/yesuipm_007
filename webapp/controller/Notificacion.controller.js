@@ -15,7 +15,8 @@
 		formatter: Formatter,
 		
 		sPernr : "",
-
+		sWerks : "",
+		_vhPersonal : "",
 		CLASE_ORDEN: "YMC",
 		
 		onInit : function() {
@@ -29,13 +30,21 @@
 			
 			var oEquiposModel = new JSONModel();
 			var oNuevaOrdenModel = new JSONModel({
-				Tplnr  : "0285-112-P08-FAGOR-5",
-				Descripcion : "test descripcion. ",
-				Werks : "2885",
-				Equnr : "10000156"
+				Tplnr  : "",
+				Descripcion : "",
+				Werks : "",
+				Equnr : "",
+				Parada : false,
+				Peticionario : "",
+				PName : "",
+				Destinatario : "",
+				DName : "",
+				Area : "",
+				Sintomas : ""
 			});
 			var oMotivosModel = new JSONModel();
 			var oPersonalModel = new JSONModel();
+			var oResponsableModel = new JSONModel();
 			var oUbicacionTecnicaModel = new JSONModel();
 			var oRepuestosMatchCodeModel = new JSONModel();
 			var oProcesoNotificacionModel = new JSONModel();		
@@ -43,6 +52,7 @@
 			this.setModel(oViewModel, 		 				'viewModel');	
 			this.setModel(oEquiposModel, 					'equiposModel');
 			this.setModel(oPersonalModel, 					'personalModel');
+			this.setModel(oResponsableModel, 				'responsableModel');
 			this.setModel(oMotivosModel, 					'motivosModel');
 			this.setModel(oRepuestosModel, 					'repuestosModel');
 			this.setModel(oNuevaOrdenModel, 				'nuevaOrdenModel');
@@ -63,6 +73,55 @@
 			oRouter.getRoute('NotificacionUrgente').attachPatternMatched(this._onRouteMatched.bind(this));	
 			oRouter.getRoute('NotificacionUrgenteOrden').attachPatternMatched(this._onRouteMatchedOrden.bind(this));*/	
 			
+		},
+
+		filterArea: function(sWerks){
+			var oBindingList = this.getView().byId("areaCombo").getBinding('items');
+			var oFilter = new sap.ui.model.Filter({
+				filters: [
+					new sap.ui.model.Filter({
+						path: "Werks",
+						operator: "EQ",
+						value1: sWerks
+					})
+				],
+				and: false
+			});
+			
+			oBindingList.filter(oFilter);
+
+		},
+
+		_getPersonal: function (sKey){
+			this.getView().getModel().read("/PersonalSet", {
+				success: function (oData){	
+					this.getView().getModel("personalModel").setProperty("/", oData.results);
+					for(var i in oData.results){
+						if (oData.results[i].Pernr === this.sPernr){
+							this.sWerks = oData.results[i].Werks;
+							this._setWerks();
+							this.getView().getModel("nuevaOrdenModel").setProperty("/Peticionario", oData.results[i].Pernr);
+							this.getView().getModel("nuevaOrdenModel").setProperty("/PName", oData.results[i].Vorna+""+oData.results[i].Nachn);
+						}
+					}
+					if (this.sWerks === "") this.onNavBack();
+				}.bind(this),
+				error: function (oError){
+					this.getView().getModel("loginModel").setProperty("/Personal", [] );
+				}.bind(this)
+			});
+		},
+
+		
+		_getResponsables: function (sKey){
+			this.getView().getModel().read("/ResponsableSet", {
+				success: function (oData){	
+					this.getView().getModel("responsableModel").setProperty("/", oData.results);
+				}.bind(this),
+				error: function (oError){
+					this.getView().getModel("responsableModel").setProperty("/", [] );
+				}.bind(this)
+			});
 		},
 		
 		onSearchUsuario : function(oEvent){
@@ -92,6 +151,28 @@
 			oBindingList.filter(oFilter);
 		},
 
+		onSearchResponsable : function(oEvent){
+			var sQuery = oEvent.getParameter('value');
+			var oBindingList = oEvent.getSource().getBinding('items');
+			var oFilter = new sap.ui.model.Filter({
+				filters: [
+					new sap.ui.model.Filter({
+						path: "Pernr",
+						operator: "Contains",
+						value1: sQuery
+					}),
+					new sap.ui.model.Filter({
+						path: "Sname",
+						operator: "Contains",
+						value1: sQuery
+					}),
+				],
+				and: false
+			});
+			
+			oBindingList.filter(oFilter);
+		},
+
 		checkNotifTemp : function() {
 			
 			var oView 		= this.getView();
@@ -104,8 +185,14 @@
 					
 					if(oNotificacionTemporal.Aufnr) return;
 					
-					oViewModel.setProperty("/ordenIniciada", true);
-					
+					if (oNotificacionTemporal.HoraFin && oNotificacionTemporal.HoraFin.ms !== 0){
+						oViewModel.setProperty("/stepCompleteCabecera", true);
+						oViewModel.setProperty("/ordenIniciada", false);
+						this.oWizardCrearOrden.setCurrentStep(this.byId('wizardStepRepuestos'));
+						this.oWizardCrearOrden.goToStep(this.byId('wizardStepRepuestos'));	
+					}else{	
+						oViewModel.setProperty("/ordenIniciada", true);
+					}
 					oNuevaOrdenModel.setProperty("/Tplnr", oNotificacionTemporal.Tplnr);
 					
 					if(oNotificacionTemporal.Tplnr){
@@ -118,18 +205,24 @@
 								oViewModel.setProperty("/valueStateUT", "None");
 								oViewModel.setProperty("/valueStateTextUT", "");
 								oNuevaOrdenModel.setProperty("/Pltxt", oUbicacionTecnica[0].Pltxt);
-								this._getEquipos(undefined, oUbicacionTecnica[0].Tplnr);
+								this._getEquipos( oUbicacionTecnica[0].Tplnr);
 							}
 						}.bind(this));
 					}else{
-						this._getEquipos(oNotificacionTemporal.Werks);
+						this._getEquipos();
 					}
 					
 					oNuevaOrdenModel.setProperty("/Equnr", oNotificacionTemporal.Equnr);
 					oNuevaOrdenModel.setProperty("/Descripcion", oNotificacionTemporal.Txt);
 					oNuevaOrdenModel.setProperty("/FechaInicio", oNotificacionTemporal.FechaIni);
 					oNuevaOrdenModel.setProperty("/HoraInicio", oNotificacionTemporal.HoraIni);
-					
+					oNuevaOrdenModel.setProperty("/FechaFin", oNotificacionTemporal.FechaFin);
+					oNuevaOrdenModel.setProperty("/HoraFin", oNotificacionTemporal.HoraFin);
+					oNuevaOrdenModel.setProperty("/Area", oNotificacionTemporal.Beber);
+					oNuevaOrdenModel.setProperty("/Sintomas", oNotificacionTemporal.Sintomas);
+					oNuevaOrdenModel.setProperty("/Destinatario", oNotificacionTemporal.Destinatario);
+					oNuevaOrdenModel.setProperty("/Peticionario", oNotificacionTemporal.Peticionario);
+					oNuevaOrdenModel.setProperty("/Parada", oNotificacionTemporal.Msaus);
 				}, ( Error ) => {
 					this._getEquipos();
 				}
@@ -173,6 +266,15 @@
 					}.bind(this),
 					error: function(oError){
 						oViewModel.setProperty("/cargandoWizard", false);
+						var sMessage = Formatter.parseError(oError.responseText)
+						MessageBox.confirm(
+							sMessage, {
+					        icon: sap.m.MessageBox.Icon.ERROR,
+					        actions: [sap.m.MessageBox.Action.OK],
+					        title: "Error",
+					        onClose: function(oAction) {}.bind(this)
+						});						
+						oViewModel.setProperty("/cargandoWizard", false);
 					}.bind(this)
 				});
 
@@ -206,7 +308,12 @@
 						Pernr: this.sPernr,
 						Tplnr: oNuevaOrdenModel.getProperty("/Tplnr"),
 						Equnr: oNuevaOrdenModel.getProperty("/Equnr"),
-						Descripcion: oNuevaOrdenModel.getProperty("/Descripcion")
+						Descripcion: oNuevaOrdenModel.getProperty("/Descripcion"),
+						Beber 		: oNuevaOrdenModel.getProperty("/Area"), 
+						Peticionario : oNuevaOrdenModel.getProperty("/Peticionario"), 
+						Destinatario : oNuevaOrdenModel.getProperty("/Destinatario"), 
+						Msaus : oNuevaOrdenModel.getProperty("/Parada"), 
+						Sintomas : oNuevaOrdenModel.getProperty("/Sintomas")
 					}, 
 					success: function(oData){
 						oNuevaOrdenModel.setProperty("/FechaInicio", new Date());
@@ -265,7 +372,7 @@
 					oViewModel.setProperty("/valueStateUT", "None");
 					oViewModel.setProperty("/valueStateTextUT", "");
 					oNuevaOrdenModel.setProperty("/Pltxt", oUbicacionTecnica[0].Pltxt);
-					this._getEquipos(oNuevaOrdenModel.getProperty("/Werks"), oUbicacionTecnica[0].Tplnr);
+					this._getEquipos( oUbicacionTecnica[0].Tplnr);
 				}
 			}.bind(this));
 			
@@ -277,7 +384,7 @@
 				this._oDialogoUbicacionesTecnicas = sap.ui.xmlfragment("es.cdl.yesui5pm003.view.fragment.DialogoUbicacionesTecnicas", this); 
 				this.getView().addDependent(this._oDialogoUbicacionesTecnicas);
 			}
-			this._getUbicacionesTecnicas();		
+				
 			this._oDialogoUbicacionesTecnicas.open();
 
 		},
@@ -294,7 +401,7 @@
 			oViewModel.setProperty("/valueStateUT", "None");
 			oNuevaOrdenModel.setProperty("/Tplnr", oSelectedContext.getProperty('Tplnr'));
 			oNuevaOrdenModel.setProperty("/Pltxt", oSelectedContext.getProperty('Pltxt'));
-			this._getEquipos(oNuevaOrdenModel.getProperty("/Werks"), oSelectedContext.getProperty('Tplnr'));
+			this._getEquipos(oSelectedContext.getProperty('Tplnr'));
 			
 		},
 				
@@ -436,7 +543,7 @@
 				oModel.createEntry("/NotificacionUrgenteSet", {
 					properties: {
 						Pernr 		: this.sPernr,
-						Werks		: oNuevaOrden.Werks,
+						Werks		: this.sWerks,
 						FechaInicio	: oFechaInicio,
 						HoraInicio 	: oNuevaOrden.HoraInicio,
 						FechaFin 	: oFechaFin,
@@ -445,7 +552,13 @@
 						Tplnr		: oNuevaOrden.Tplnr,
 						Ilart		: oNuevaOrden.Ilart,
 						Ktext		: oNuevaOrden.Descripcion,
-						Observacion	: oNuevaOrden.TxtCabecera
+						Observacion	: oNuevaOrden.TxtCabecera,
+						Beber 		: oNuevaOrden.Area,
+						Peticionario : oNuevaOrden.Peticionario,
+						Destinatario : oNuevaOrden.Destinatario,
+						Msaus : oNuevaOrden.Parada,
+						Sintomas : oNuevaOrden.Sintomas
+
 					},
 					success: function(oData, oResponse){
 						
@@ -515,11 +628,15 @@
 			}
 						
 		},
+
+		 onAfterCloseDialogoNotificacion: function(){
+			this.getView().setBusy(false);
+		 },
 		
 		 onCerrarDialogoProcesoNotificacion : function(oEvent){
 		 	var oProcesoNotificacionModel = this.getModel('procesoNotificacionModel');
 		 	var bErrorOrden = oProcesoNotificacionModel.getProperty("/errorOrden");
-		 	
+		 	this.getView().setBusy(false);
 			this._oBusyDialogNotificacion.close();
 			this._resetProcesoNotificacion();
 			
@@ -626,9 +743,11 @@
 			
 		},
 		
-		onChangeCentro : function(oEvent){
-			this._getMotivos();	
-			this._getEquipos(oEvent.getParameter('selectedItem').getKey())
+		_setWerks : function(){
+			this.filterArea(this.sWerks);
+			this._getUbicacionesTecnicas();	
+			this._getEquipos();
+
 		},
 		
 		onConfirmRepuesto : function(oEvent){},
@@ -645,11 +764,13 @@
 			var oProcesoNotificacionModel = this.getModel('procesoNotificacionModel');
 			var oCData = this.getOwnerComponent().getComponentData();
 			
-			if (oCData){
+ 			if (oCData){
 
 				if (oCData.startupParameters.Pernr !== undefined){
 					if(oCData.startupParameters.Pernr[0] !== ""){
 						this.sPernr = oCData.startupParameters.Pernr[0];
+						this._getPersonal();
+						this._getResponsables();
 						this.checkNotifTemp();
 					}else{
 						this.onNavBack();	
@@ -657,7 +778,7 @@
 				}
 			}else{
 				this.onNavBack();
-			}
+			} 
 
 			oViewModel.setProperty("/", {
 				ordenIniciada: false,
@@ -706,7 +827,7 @@
 			var oModelView = oView.getModel('viewModel');
 			var oNuevaOrdenModel = this.getModel('nuevaOrdenModel');			
 
-			var sCentro = oNuevaOrdenModel.getProperty("/Werks");
+			var sCentro = this.sWerks;
 			var aFilters = new Array();
 			
 			aFilters.push(new Filter({
@@ -742,7 +863,7 @@
 			var oNuevaOrdenModel = this.getModel('nuevaOrdenModel');			
 
 			var oViewModel = this.getModel('viewModel');
-			var sCentro = oNuevaOrdenModel.getProperty("/Werks");
+			var sCentro = this.sWerks;
 
 			oViewModel.setProperty("/isCargandoUbicacionesList", true);
 			oUbicacionTecnicaModel.setProperty("/", new Array());			
@@ -767,7 +888,7 @@
 			
 		},
 		
-		_getEquipos : function(sWerks, sTplnr){
+		_getEquipos : function(sTplnr){
 			
 			var oModel = this.getModel();
 			var oEquiposModel = this.getModel('equiposModel');
@@ -775,11 +896,11 @@
 			
 			oEquiposModel.setProperty("/", []);
 			
-			if(sWerks){
+			if(this.sWerks){
 				aFilters.push(new Filter({
 					path: 'Werks',
 					operator: 'EQ',
-					value1: sWerks
+					value1: this.sWerks
 				}));
 			}
 			
@@ -806,7 +927,7 @@
 			var oNuevaOrdenModel = this.getModel('nuevaOrdenModel');
 			var oViewModel = this.getModel('viewModel');
 			
-			var sCentro = oNuevaOrdenModel.getProperty("/Werks");
+			var sCentro = this.sWerks;
 			
 			oRepuestosMatchCodeModel.setProperty("/", []);
 			var aFilters = [];
@@ -839,7 +960,7 @@
 		
 		_getMotivos : function(){
 			
-			var oModel = this.getModel();
+			/* var oModel = this.getModel();
 			var oMotivosModel = this.getModel('motivosModel');
 			var oNuevaOrdenModel = this.getModel('nuevaOrdenModel');
 
@@ -856,7 +977,7 @@
 				success: function(oData){
 					oMotivosModel.setProperty("/", oData.results);
 				}
-			});
+			}); */
 		},
 		
 		_getNotificacionTemporal : function(fnSuccess, fnError){
@@ -899,6 +1020,49 @@
 			});
 
 		 },
+
+		 onConfirmSeleccionUsuario : function(oEvent) {
+
+			var oSelectedItem = oEvent.getParameter('selectedItem');
+			var oUsuario = oSelectedItem.getBindingContext("personalModel").getObject();
+			var sPath = this._vhPersonal;
+			this.getView().getModel("nuevaOrdenModel").setProperty("/"+sPath, oUsuario.Pernr);
+			this.getView().getModel("nuevaOrdenModel").setProperty("/"+sPath.substring(0, 1)+"Name", oUsuario.Vorna+" "+oUsuario.Nachn);
+
+		},
+
+		onConfirmSeleccionResponsable : function(oEvent) {
+
+			var oSelectedItem = oEvent.getParameter('selectedItem');
+			var oUsuario = oSelectedItem.getBindingContext("responsableModel").getObject();
+			var sPath = oSelectedItem.getBindingContext("responsableModel").get
+			this.getView().getModel("nuevaOrdenModel").setProperty("/Destinatario", oUsuario.Pernr);
+			this.getView().getModel("nuevaOrdenModel").setProperty("/DName", oUsuario.Sname);
+
+		},
+
+		onSeleccionUsuario : function(oEvent) {
+			
+			if (!this._oMatchCodeUsuarios) {
+				this._oMatchCodeUsuarios = sap.ui.xmlfragment("es.cdl.yesui5pm003.view.fragment.personalVH", this);
+				this.getView().addDependent(this._oMatchCodeUsuarios);
+			}
+
+			this._vhPersonal = oEvent.getSource().getName();
+	
+			this._oMatchCodeUsuarios.open();
+		},
+
+		
+		onSeleccionResponsable : function(oEvent) {
+			
+			if (!this._oMatchCodeResponsable) {
+				this._oMatchCodeResponsable = sap.ui.xmlfragment("es.cdl.yesui5pm003.view.fragment.responsableVH", this);
+				this.getView().addDependent(this._oMatchCodeResponsable);
+			}
+	
+			this._oMatchCodeResponsable.open();
+		},
 		
 		_notificarMateriales : function(sAufnr){
 
@@ -967,6 +1131,7 @@
 					
 				}.bind(this),
 				error: function(){
+					this.getView().setBusy(false);
 					MessageBox.confirm(
 						"The error occurred on the application server, you will find more information in transaction ST22", {
 				        icon: sap.m.MessageBox.Icon.ERROR,

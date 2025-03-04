@@ -9,11 +9,12 @@
 			keepFontSize="true">
 			<l:BlockLayoutRow>
 				<l:BlockLayoutCell
-					title="{i18n>parteTrabajo}">
+					>
 					<form:SimpleForm
 					    layout="ResponsiveGridLayout"
 				       	editable="true">
 					    <form:content>
+							<Title titleStyle="H4" class="sapUiSmallMarginBottom" text="{i18n>parteTrabajo}"></Title>
 				        	<Label text="{i18n>descripcion}"/>
 				        	<Input value="{nuevaOrdenModel>/Descripcion}" enabled="{= !${viewModel>/ordenIniciada} }" maxLength="40"/>
 			        		<!-- <Label text="{i18n>centro}"/>
@@ -43,6 +44,7 @@
 					        <ComboBox
 					        	enabled="{= !${viewModel>/ordenIniciada} }"
 					        	showSecondaryValues="true"
+								change="onChangeEquipo"
 					        	filterSecondaryValues="true"
 					        	selectedKey="{nuevaOrdenModel>/Equnr}"
 					        	items="{equiposModel>/}">
@@ -78,21 +80,21 @@
 					            showValueHelp="true"/>
 							<Label text="{i18n>parada}"/>
 							<Switch state="{nuevaOrdenModel>/Parada}" customTextOn="SÍ" customTextOff="NO" enabled="{= !${viewModel>/ordenIniciada} }"/>
-							<Label text="{i18n>sintomas}"/>
+						<!--	<Label text="{i18n>sintomas}"/>
 							<TextArea 
 								rows="5"
 								enabled="{= !${viewModel>/ordenIniciada} }"
 								cols="50"
-								value="{nuevaOrdenModel>/Sintomas}" />
+								value="{nuevaOrdenModel>/Sintomas}" /> -->
 					    </form:content>
 					</form:SimpleForm>
 				</l:BlockLayoutCell>
-				<l:BlockLayoutCell
-					title="{i18n>tiemposNotificacion}">
+				<l:BlockLayoutCell >
 					<form:SimpleForm
 					    layout="ResponsiveGridLayout"
 				       	editable="true">
 					    <form:content>
+							<Title  text="{i18n>tiemposNotificacion}" titleStyle="H4" class="sapUiSmallMarginBottom"></Title>
 				        	<Label text="{i18n>fechaInicio}" />
 						    <DatePicker 
 						    	enabled="{viewModel>/stepCompleteCabecera}"
@@ -118,7 +120,41 @@
 						    		type: 'sap.ui.model.odata.type.Time'
 						    	}"
 						    	valueFormat="HH:mm"
-								displayFormat="HH:mm" />							
+								displayFormat="HH:mm" />	
+							<Label text="{i18n>tareaCompletada}" />
+							<Switch state="{nuevaOrdenModel>/Completada}" customTextOn="SÍ" customTextOff="NO" enabled="{viewModel>/stepCompleteCabecera}"/>						
+							<!-- DETALLES AVERIA -->
+							<Title  text="Detalles avería" titleStyle="H4" class="sapUiMediumMarginTop sapUiSmallMarginBottom">
+								<layoutData>
+									<l:GridData  linebreak="true"/>
+								</layoutData>   
+							</Title>
+							<Label text="{i18n>TIPOLOGIA}" visible="{nuevaOrdenModel>/TipoReq}" />
+							<Select
+								visible="{nuevaOrdenModel>/TipoReq}"
+								items="{catTipoModel>/}" 
+					        	forceSelection="false"
+								id="idSelectTipo"
+								enabled="{= !${viewModel>/ordenIniciada} }"
+					        	showSecondaryValues="true"
+					        	selectedKey="{nuevaOrdenModel>/Tipologia}">
+					        	<core:ListItem key="{catTipoModel>Code}" text="{catTipoModel>Txt}" additionalText="{catTipoModel>Code}"/>
+					        </Select>
+							<Label text="{i18n>CAUSA}" visible="{nuevaOrdenModel>/TipoCausa}"/>						
+							<Select items="{catCausaModel>/}"
+								visible="{nuevaOrdenModel>/CausaReq}"
+								id="idSelectCausas"
+								showSecondaryValues="true"
+								enabled="{= !${viewModel>/ordenIniciada} }"
+								forceSelection="false" selectedKey="{nuevaOrdenModel>/Causa}">
+								<core:ListItem key="{catCausaModel>Code}" text="{catCausaModel>Txt}" additionalText="{catCausaModel>Code}" />
+                        	</Select>
+							<Label text="{i18n>sintomas}"/>
+							<TextArea 
+								rows="5"
+								enabled="{= !${viewModel>/ordenIniciada} }"
+								cols="50"
+								value="{nuevaOrdenModel>/Sintomas}" />
 						</form:content>
 					</form:SimpleForm>
 				</l:BlockLayoutCell>	

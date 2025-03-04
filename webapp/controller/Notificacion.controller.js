@@ -47,7 +47,9 @@
 			var oResponsableModel = new JSONModel();
 			var oUbicacionTecnicaModel = new JSONModel();
 			var oRepuestosMatchCodeModel = new JSONModel();
-			var oProcesoNotificacionModel = new JSONModel();		
+			var oProcesoNotificacionModel = new JSONModel();	
+			var oCatalogoTipoModel = new JSONModel();
+			var oCatalogoCausaModel = new JSONModel();	
 			
 			this.setModel(oViewModel, 		 				'viewModel');	
 			this.setModel(oEquiposModel, 					'equiposModel');
@@ -59,6 +61,8 @@
 			this.setModel(oUbicacionTecnicaModel, 			'ubicacionTecnicaModel');
 			this.setModel(oRepuestosMatchCodeModel, 		'repuestosMatchCodeModel');
 			this.setModel(oProcesoNotificacionModel, 		'procesoNotificacionModel');
+			this.setModel(oCatalogoTipoModel, 				'catCausaModel');
+			this.setModel(oCatalogoCausaModel, 				'catTipoModel');
 
 			this.oWizardCrearOrden = this.byId('WizardCrearOrden');
 			
@@ -205,13 +209,18 @@
 								oViewModel.setProperty("/valueStateUT", "None");
 								oViewModel.setProperty("/valueStateTextUT", "");
 								oNuevaOrdenModel.setProperty("/Pltxt", oUbicacionTecnica[0].Pltxt);
+								oNuevaOrdenModel.setProperty("/CausaReq", oUbicacionTecnica[0].CausaReq);
+								oNuevaOrdenModel.setProperty("/TipoReq", oUbicacionTecnica[0].TipoReq);
 								this._getEquipos( oUbicacionTecnica[0].Tplnr);
+								this._getCatalogos(oUbicacionTecnica[0].Tplnr, "");
 							}
 						}.bind(this));
 					}else{
 						this._getEquipos();
 					}
-					
+					if (oNotificacionTemporal.Equnr){
+						this._getCatalogos("", oNotificacionTemporal.Equnr);
+					}
 					oNuevaOrdenModel.setProperty("/Equnr", oNotificacionTemporal.Equnr);
 					oNuevaOrdenModel.setProperty("/Descripcion", oNotificacionTemporal.Txt);
 					oNuevaOrdenModel.setProperty("/FechaInicio", oNotificacionTemporal.FechaIni);
@@ -223,6 +232,10 @@
 					oNuevaOrdenModel.setProperty("/Destinatario", oNotificacionTemporal.Destinatario);
 					oNuevaOrdenModel.setProperty("/Peticionario", oNotificacionTemporal.Peticionario);
 					oNuevaOrdenModel.setProperty("/Parada", oNotificacionTemporal.Msaus);
+					oNuevaOrdenModel.setProperty("/Causa", oNotificacionTemporal.CauseCode);
+					oNuevaOrdenModel.setProperty("/CauseCodegrp", oNotificacionTemporal.CauseCodegrp);
+					oNuevaOrdenModel.setProperty("/Tipologia", oNotificacionTemporal.Code);
+					oNuevaOrdenModel.setProperty("/Codegrp", oNotificacionTemporal.Codegrp);
 				}, ( Error ) => {
 					this._getEquipos();
 				}
@@ -285,8 +298,14 @@
 				var sPernr = this.sPernr;
 				var sTplnr = oNuevaOrdenModel.getProperty("/Tplnr");
 				var sEqunr = oNuevaOrdenModel.getProperty("/Equnr");
-				
-				
+				var sIdCausa = sap.ui.core.Fragment.createId(this.getView().getId(), "idSelectCausas")
+				var sIdTipo = sap.ui.core.Fragment.createId(this.getView().getId(), "idSelectTipo")
+				var oTipo = sap.ui.getCore().byId(sIdTipo).getSelectedItem();
+				var oCausa = sap.ui.getCore().byId(sIdCausa).getSelectedItem();
+				var sCode = (oTipo !== null) ? oTipo.getBindingContext("catTipoModel").getObject().Code : "";
+				var sCodeGrp = (oTipo !== null) ? oTipo.getBindingContext("catTipoModel").getObject().Codegrp : "";
+				var sCodeCau = (oCausa !== null) ? oCausa.getBindingContext("catCausaModel").getObject().Code : "";
+				var sCodeGrpCau = (oCausa !== null) ? oCausa.getBindingContext("catCausaModel").getObject().Codegrp : "";
 				
 				if((!sPernr || oViewModel.getProperty("/pernrValueState") === "Error") && !sPernr){
 					MessageToast.show(this.getResourceBundle().getText('numPersonalObligatorio'), { width: '30em'});
@@ -313,7 +332,11 @@
 						Peticionario : oNuevaOrdenModel.getProperty("/Peticionario"), 
 						Destinatario : oNuevaOrdenModel.getProperty("/Destinatario"), 
 						Msaus : oNuevaOrdenModel.getProperty("/Parada"), 
-						Sintomas : oNuevaOrdenModel.getProperty("/Sintomas")
+						Sintomas : oNuevaOrdenModel.getProperty("/Sintomas"),
+						CauseCode : sCodeCau,
+						CauseCodegrp : sCodeGrpCau,
+						Code : sCode,
+						Codegrp : sCodeGrp
 					}, 
 					success: function(oData){
 						oNuevaOrdenModel.setProperty("/FechaInicio", new Date());
@@ -377,6 +400,13 @@
 			}.bind(this));
 			
 		},
+
+		onChangeEquipo:function(){
+			var oSelectedContext = oEvent.getParameter('selectedContexts')[0];
+			this._getCatalogos("", oSelectedContext.getProperty('Equnr'));
+			oNuevaOrdenModel.setProperty("/TipoReq", oSelectedContext.getProperty('TipoReq'));
+			oNuevaOrdenModel.setProperty("/CausaReq", oSelectedContext.getProperty('CausaReq'));
+		},
 		
 		onSelectUbicacionList : function(oEvent) {
 			
@@ -401,8 +431,10 @@
 			oViewModel.setProperty("/valueStateUT", "None");
 			oNuevaOrdenModel.setProperty("/Tplnr", oSelectedContext.getProperty('Tplnr'));
 			oNuevaOrdenModel.setProperty("/Pltxt", oSelectedContext.getProperty('Pltxt'));
+			oNuevaOrdenModel.setProperty("/TipoReq", oSelectedContext.getProperty('TipoReq'));
+			oNuevaOrdenModel.setProperty("/CausaReq", oSelectedContext.getProperty('CausaReq'));
 			this._getEquipos(oSelectedContext.getProperty('Tplnr'));
-			
+			this._getCatalogos(oSelectedContext.getProperty('Tplnr'), "");
 		},
 				
 		onPressRepuestos : function(oEvent){
@@ -526,7 +558,31 @@
 
 		 	var oNuevaOrden = oNuevaOrdenModel.getProperty("/");
 		 	var oRepuestos = oRepuestosModel.getProperty("/repuestos");
-
+			var oTipo, oCausa;
+			var sIdCausa = sap.ui.core.Fragment.createId(this.getView().getId(), "idSelectCausas");
+			var sIdTipo = sap.ui.core.Fragment.createId(this.getView().getId(), "idSelectTipo");
+			var oCausaItem = sap.ui.getCore().byId(sIdCausa).getSelectedItem(); 
+			if (oCausaItem !== null){
+				oCausa = oCausaItem.getBindingContext("catCausaModel").getObject();
+			}else{
+				if(oNuevaOrden.CausaReq === true){
+					MessageToast.show("Es necesario informar la causa.", {
+						width: "30em"
+					});
+					return;	
+			}
+			}
+			var oTipoItem = sap.ui.getCore().byId(sIdTipo).getSelectedItem();
+			if (oTipoItem !== null){
+				oTipo = oTipoItem.getBindingContext("catTipoModel").getObject();
+			}else{
+				if(oNuevaOrden.TipoReq === true){
+					MessageToast.show("Es necesario informar la tipología.", {
+						width: "30em"
+					});
+					return;	
+				}
+			}
 			var oTime = new Time();
 									
 			if(oNuevaOrden.FechaInicio && oNuevaOrden.FechaFin && 
@@ -557,7 +613,12 @@
 						Peticionario : oNuevaOrden.Peticionario,
 						Destinatario : oNuevaOrden.Destinatario,
 						Msaus : oNuevaOrden.Parada,
-						Sintomas : oNuevaOrden.Sintomas
+						Sintomas : oNuevaOrden.Sintomas, 
+						Completada : ( oNuevaOrden.Completada === true ) ? 'X' : '',
+						CauseCode : (oCausa) ? oCausa.Code : "",
+						CauseCodegrp : (oCausa) ? oCausa.Codegrp : "",
+						Code : (oTipo) ? oTipo.Code : "",
+						Codegrp : (oTipo) ? oTipo.Codegrp : ""
 
 					},
 					success: function(oData, oResponse){
@@ -915,8 +976,18 @@
 			oModel.read("/EquiposSet",{
 				filters: aFilters,
 				success: function(oData){
-					oEquiposModel.setProperty("/", oData.results);					
-				}
+					oEquiposModel.setProperty("/", oData.results);	
+					var sEqunr = this.getView().getModel('nuevaOrdenModel').getProperty("/Equnr");
+					if (sEqunr !== "" && sEqunr !== undefined){
+						for (var i in oData.results){
+							if (oData.results[i].Equnr === sEqunr){
+								oNuevaOrdenModel.setProperty("/TipoReq", oData.results[i].TipoReq);
+								oNuevaOrdenModel.setProperty("/CausaReq", oData.results[i].CausaReq);
+								break;
+							}
+						}
+					}				
+				}.bind(this)
 			});
 		},
 				
@@ -957,27 +1028,70 @@
 				}
 			});
 		},
-		
-		_getMotivos : function(){
-			
-			/* var oModel = this.getModel();
-			var oMotivosModel = this.getModel('motivosModel');
-			var oNuevaOrdenModel = this.getModel('nuevaOrdenModel');
 
-			var sCentro = oNuevaOrdenModel.getProperty("/Werks");
+		_getCatalogos : function(sTplnr, sEqunr){
 			
-			oMotivosModel.setProperty("/", []);
+			var oModel = this.getModel();
+			var oCausasModel = this.getModel('catCausaModel');
+			var oTipoModel = this.getModel('catTipoModel');
+			var aFilterTipo = [];
+			var aFilterCausa = [];
 			
-			oModel.read("/MotivosSet",{
-				filters: [new Filter({
-					path: 'Werks',
+			oCausasModel.setProperty("/", []);
+			oTipoModel.setProperty("/", []);
+			
+			if(sTplnr !== "" && sTplnr !== undefined){
+				aFilterTipo.push(new Filter({
+					path: 'Tplnr',
 					operator: 'EQ',
-					value1: sCentro
-				})],
+					value1: sTplnr
+				}));
+
+				aFilterCausa.push(new Filter({
+					path: 'Tplnr',
+					operator: 'EQ',
+					value1: sTplnr
+				}));
+			}
+			
+			if(sEqunr !== "" && sEqunr !== undefined){
+				aFilterTipo.push(new Filter({
+					path: 'Equnr',
+					operator: 'EQ',
+					value1: sEqunr
+				}));
+
+				aFilterCausa.push(new Filter({
+					path: 'Equnr',
+					operator: 'EQ',
+					value1: sEqunr
+				}));
+			}
+
+			aFilterTipo.push(new Filter({
+				path: 'Qkatart',
+				operator: 'EQ',
+				value1: 'D'
+			}));
+
+			aFilterCausa.push(new Filter({
+				path: 'Qkatart',
+				operator: 'EQ',
+				value1: '5'
+			}));
+			oModel.read("/CatalogosSet",{
+				filters: aFilterTipo,
 				success: function(oData){
-					oMotivosModel.setProperty("/", oData.results);
+					oTipoModel.setProperty("/", oData.results);					
 				}
-			}); */
+			});
+
+			oModel.read("/CatalogosSet",{
+				filters: aFilterCausa,
+				success: function(oData){
+					oCausasModel.setProperty("/", oData.results);					
+				}
+			});
 		},
 		
 		_getNotificacionTemporal : function(fnSuccess, fnError){
